@@ -20,12 +20,23 @@ abatement_costs <- read_csv("HW4Data.csv")
  Sectors A, B, and C are in country X. Sector D is in a different country, Y.
  Prices are in $/ton and quantities are in tons.
 
-1. Write down a plausible functional form for the marginal cost of abatement for sector A. Use regression
-analysis to estimate the parameters of that function. Repeating this for sectors B, C, and D will give
-you a model of the marginal cost of abatement function for each sector. How well do your models fit
-the data for each sector? You may need to experiment with different functional forms. Produce a plot
-of the estimated marginal abatement cost functions in all four sectors (this plot should go in your
-memo).
+1. Write down a plausible functional form for the marginal cost of abatement for sector A. Use regression analysis to estimate the parameters of that function. Repeating this for sectors B, C, and D will give you a model of the marginal cost of abatement function for each sector. How well do your models fit the data for each sector? You may need to experiment with different functional forms. Produce a plot of the estimated marginal abatement cost functions in all four sectors (this plot should go in your memo).
+
+```{r}
+#arrange data in tidy format 
+tidy_costs <- abatement_costs %>% 
+  gather(MC, Cost, MC_A:MC_D)
+```
+
+```{r}
+#plot of all the MC curves
+cost_curves <- ggplot(tidy_costs, aes(x = Abatement, y = Cost)) +
+  geom_smooth(aes(color = MC)) +
+  theme_classic()
+
+cost_curves 
+```
+
 
 2. Using these models and the current level of carbon emissions, derive each sector’s demand curve for
 carbon emissions. In other words, how much would each sector be willing to pay for the right to
