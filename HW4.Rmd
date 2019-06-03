@@ -37,34 +37,78 @@ cost_curves <- ggplot(tidy_costs, aes(x = Abatement, y = Cost)) +
 cost_curves 
 ```
 
-<<<<<<< HEAD
+
+linear models: 
 ```{r}
-tidy_costs <- abatement_costs %>% 
-  gather(key = c("MC_A","MC_B", "MC_C", "MC_D"))
+
+lm_A <- lm(MC_A ~ Abatement, data = abatement_costs)
+lm_B <- lm(MC_B ~ Abatement, data = abatement_costs)
+lm_C <- lm(MC_C ~ Abatement, data = abatement_costs)
+lm_D <- lm(MC_D ~ Abatement, data = abatement_costs)
+
+summary(lm_C)
+summary(lm_B)
+summary(lm_A)
+
+```
+
+Plot for all models 
+```{r}
+
+model_plot_A <- ggplot(abatement_costs, aes(x = Abatement)) +
+  geom_smooth(aes(y = MC_A), method = lm, se = TRUE, size = 0.5, color = "black") +
+  geom_point(aes(y = MC_A, color = "MC_A")) +
+  geom_smooth(aes(y = MC_B), method = lm, se = TRUE, size = 0.5, color = "black") +
+  geom_point(aes(y = MC_B, color = "MC_B")) +
+  geom_smooth(aes(y = MC_C), method = lm, se = TRUE, size = 0.5, color = "black") +
+  geom_point(aes(y = MC_C, color = "MC_C")) +
+  geom_smooth(aes(y = MC_D), method = lm, se = TRUE, size = 0.5, color = "black") +
+  geom_point(aes(y = MC_D, color = "MC_D"))
+  
+ 
+model_plot_A
+
 ```
 
 
 
-2. Using these models and the current level of carbon emissions, derive each sector’s demand curve for
-carbon emissions. In other words, how much would each sector be willing to pay for the right to
-pollute the first unit, second unit, etc? Draw these demand curves on a graph. Which sector is willing to
-pay the most for the first unit of carbon emissions?
-=======
->>>>>>> 9d2089bd376fadbfb13b4587001bdf48f2487615
-
 2. Using these models and the current level of carbon emissions, derive each sector’s demand curve for carbon emissions. In other words, how much would each sector be willing to pay for the right to pollute the first unit, second unit, etc? Draw these demand curves on a graph. Which sector is willing to pay the most for the first unit of carbon emissions?
- 
- 
-3. Now focus on country X (which contains sectors A, B, and C). Assume there are no “co-benefits” from carbon abatement (i.e. that there are no local pollutants that are affected by carbon abatement). Suppose to meet the Paris Accord commitments, country X needs to cut all carbon emissions in half. For each of the policy options listed below, derive: (1) the total cost of meeting the target in country X,
-(2) the cost (or benefit) to each sector, and (3) the tax revenue generated.
+
+- Current carbon emissions in the sectors are: (A=180, B=200, C=220, and D=300) 
+
+Equations: 
+Sector A: cost_abatement = 0.57684X  - 8.64448; A = 180 
+Sector A demand: demand = 103.8312 - 0.57684X 
+In sector A, demand at 180 will be 0, as firms are producing at 180 with no regulations in place. Using this and the slope of the abatement cost curve, we caclulated the intercept of the demand curve
+
+Sector B: cost_abatement = 9.31770 + 0.19874X; B = 200
+Sector C: 
+
+Graph of demand curves 
+```{r}
+sector_a <- function(x) (103.8312 - 0.5768*x)
+
+```
+
+3. Now focus on country X (which contains sectors A, B, and C). Assume there are no “co-benefits” from carbon abatement (i.e. that there are no local pollutants that are affected by carbon abatement). Suppose to meet the Paris Accord commitments, country X needs to cut all carbon emissions in half. For each of the policy options listed below, derive: (1) the total cost of meeting the target in country X, (2) the cost (or benefit) to each sector, and (3) the tax revenue generated.
+
 a. Cap on carbon. Each sector (A, B, and C) must cut its carbon emissions by 100 tons (thus
 reducing total emissions from 600 down to 300).
+
+New sector A emissions: 80
+New sector B emissions: 100
+New sector C emissions: 120 
+
 b. Tax on carbon. To emit a ton of carbon in country X, you must pay a tax of $t. You will need to
 find the tax that accomplishes the desired reduction.
+
+
+
 c. Cap and trade. Each sector (A, B, C) is allocated carbon permits equal to their current emissions
 minus 100 (same as in (a) above), thus achieving the total reduction of 300. Then, these three
 sectors are allowed to trade with each other. You will need to derive the outcome of that
 trading.
+
 
 4. Again, without any co-benefits, suppose that country Y (which only has one carbon-emitting sector, D)
 has no obligation to reduce its emissions. Country X asks country Y to enter the country X carbon
@@ -73,12 +117,16 @@ emissions (300 tons), but would then allow country Y to sell carbon offsets to s
 there any incentives for country Y to enter country X’s carbon market and to thus place a voluntary cap
 on its emissions? Are there any incentives for country X to try to attract country Y into its market?
 
+
 5. Now assume that every ton of carbon emissions creates 1 ton of local air pollution. Local air pollution
 causes economic damages (health, environmental, etc.), but only in the country in which it is emitted.
 Assume there are no local air pollution regulations in either country X or country Y.
+
 a. In a carbon cap and trade market that only covers sectors in country X, how much local air
 pollution would you expect in country X? In country Y?
+
 b. If country Y enters the carbon market for country X (as in question 4 above), how much local
 pollution will there be in country X and country Y?
+
 c. What advice can you give country X and country Y about the desirability of allowing
 international trade of carbon emissions credits?
