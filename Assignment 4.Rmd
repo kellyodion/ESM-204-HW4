@@ -1,0 +1,272 @@
+---
+title: "HW4"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#1. Cost of abatement 
+```{r, include=FALSE}
+library(stargazer)
+library(dplyr)
+library(ggplot2)
+library(Hmisc)
+
+data <- read.csv("HW4Data.csv")
+
+lma<- lm(MC_A~Abatement, data=data)
+summary(lma)
+lmb<- lm(MC_B~Abatement, data=data)
+summary(lmb)
+lmc<- lm(MC_C~Abatement, data=data)
+summary(lmc)
+lmd<- lm(MC_D~Abatement, data=data)
+summary(lmd)
+```
+
+```{r, echo=FALSE}
+stargazer(lma, lmb, lmc, lmd, type="text", title="Table 1: Regression Results")
+```
+
+
+
+```{r, echo=FALSE}
+par(mfrow=c(2,2)) 
+plot(data$Abatement, data$MC_A, main = "Sector A", xlab = "Abatement (tons)", ylab = "Price")
+abline(lma)
+plot(data$Abatement, data$MC_B, main = "Sector B", xlab = "Abatement (tons)", ylab = "Price")
+abline(lmb)
+plot(data$Abatement, data$MC_C, main = "Sector C", xlab = "Abatement (tons)", ylab = "Price")
+abline(lmc)
+plot(data$Abatement, data$MC_D, main = "Sector D", xlab = "Abatement (tons)", ylab = "Price")
+abline(lmd)
+```
+
+Marginal cost of abatement functions: 
+
+$$MC_A= -8.65 + 0.58(Abatement)$$
+$$MC_B= 9.32 + 0.2 (Abatement)$$
+$$MC_C = -11.66 + 0.78 (Abatement)$$
+$$MC_D = 9.69 + 0.26 (Abatement)$$
+
+
+#2. Demand curves for carbon emissions. 
+Sector C is willing to pay more for the first unit of emissions, $159.94. 
+
+```{r, include=FALSE}
+-8.65 + (0.56*180)
+9.32 + (0.2*200)
+-11.66 + (0.78*220)
+9.69 + (0.26*300)
+
+demanda<-Hmisc::bezier(x = c(0, 165.09), y = c(95.75, 0)) %>% as_data_frame()
+demandb<- Hmisc::bezier(x = c(0, 246.6), y = c(49.32, 0)) %>% as_data_frame()
+demandc<-Hmisc::bezier(x = c(0, 205.05), y = c(159.94, 0)) %>% as_data_frame()
+demandd<- Hmisc::bezier(x = c(0, 337.27), y = c(87.69, 0)) %>% as_data_frame()
+
+(95.75 - 0)/0.58
+(49.32-0)/ 0.2
+(159.94-0)/0.78
+(87.69 -0)/0.26
+
+demanda$type<- rep("A", length(demanda$x))
+demandb$type<- rep("B", length(demandb$x))
+demandc$type<-rep("C", length(demandc$x))
+demandd$type<- rep("D", length(demandc$x))
+
+all<- rbind(demanda, demandb, demandc, demandd)
+all
+```
+
+```{r, echo=FALSE}
+ggplot(all, aes(x=x, y=y, color=type))+
+  #tiff('demand.tiff', units="in", width=10, height=5, res=300)+
+  geom_line(size=1)+
+  labs(x="Carbon Emissions (tons)", y="Price/ton", title="Estimated Demand Curve for Carbon Emissions", subtitle= "Sector A, B, C and D")+
+  theme_classic()+
+  scale_x_continuous(expand=c(0,0))+
+  scale_y_continuous(expand=c(0,0))+
+  theme(legend.title=element_blank())
+```
+
+Marginal willingness to pay for emission functions:
+$$MC_A = -0.58(Emissions) + 95.75 $$
+$$MC_B = -0.2(Emissions) + 49.32 $$
+$$MC_C =-0.78(Emissions) + 159.94 $$
+$$MC_D = -0.26 (Emissions)+ 87.69 $$
+
+#3. 
+##a. Cap on carbon: 300 tons in Country X
+We calculated the forgone benefits in each sector of not being able to pollute 100 tons of emissions using the marginal willingness to pay functions described above. Forgone benefits (cost) is the area under the deamnd curve up to 100 tons of emission for each sector.
+
+
+```{r, include=FALSE}
+
+abate<-c(100, 100, 100, 300)
+
+MCa<-(-0.58*100) + 95.75 
+MCb<-(-0.2*100) + 49.32
+MCc<-(-0.78*100) + 159.94
+
+MC<-rbind(MCa, MCb, MCc, NA)
+
+costa<-(MCa*100)+(100*(95.97-MCa)*0.5)
+costb<-(MCb*100)+(100*(49.32-MCb)*0.5)
+costc<-(MCc*100)+(100*(159.94-MCc)*0.5)
+totalcost<-sum(costa, costb, costc)
+
+cost<-rbind(costa, costb, costc, totalcost)
+
+parta<- cbind(abate, MC, cost)
+colnames(parta)=c("Units abated","Marginal cost", "Cost")
+row.names(parta)=c("Sector A", "Sector B", "Sector C", "Total Country X")
+parta
+
+
+```
+
+```{r, echo=FALSE}
+round(parta, 0)
+```
+##B. Tax
+
+One way to achieve this level of abatement is to set a tax where the marginal abatement costs are equal. Units of pollution per sector was calcualted usin the emission functions below. Forgone benefits (cost) is the area under the deamnd curve up to *Q* tons of emission for each sector.
+
+Emission functions:
+$$Aggregate MC= 616.74 - Emissions / 8$$
+$$Abatement_A = ( 95.75 - MC)/0.58 $$
+$$Abatement_B = (49.32-MC)/ 0.2 $$
+$$Abatement_C =(159.94-MC)/0.78 $$
+$$Abatement_D = (87.69 - MC)/0.26$$
+
+```{r, include=FALSE}
+MC<-(616.74-300) /8
+
+a<-( 95.75 - 0)/0.58
+b<-(49.32-0)/ 0.2
+c<-(159.94-0)/0.78
+
+abatea<-(95.75 - MC)/0.58 
+abateb<-(49.32-MC)/ 0.2
+abatec<-(159.94-MC)/0.78
+totalabate<-sum(abatea, abateb, abatec)
+
+abate<-rbind(abatea, abateb, abatec, totalabate)
+
+taxa<-abatea*MC
+taxb<-abateb*MC
+taxc<-abatec*MC
+totaltax<-sum(taxa, taxb, taxc)
+
+tax<-rbind(taxa, taxb, taxc, totaltax)
+
+costa<-MC*(a-abatea)*0.5
+costb<-MC*(b-abateb)*0.5
+costc<-MC*(c-abatec)*0.5
+totalcost<-sum(costa, costb, costc)
+
+cost<-rbind(costa, costb, costc, totalcost)
+  
+
+partb<- cbind(abate, cost,tax)
+colnames(partb)=c("Units abated", "Cost","Tax")
+row.names(partb)=c("Sector A", "Sector B", "Sector C", "Total Country X")
+partb
+
+```
+
+```{r, echo=FALSE}
+round(partb,0)
+```
+
+##C.Cap and Trade Country X
+
+Equimarginal principle: firms will trade until the cost of abatement is the same across firms. We aggregate the demand curves hoirzontally since it is a private good. Since the goal is to abate 300 units of emissions the cost of abatement that meets the equimarginal principle is $39.59. Table below summarizes results.
+
+```{r, include=FALSE}
+
+MC<-(616.74-300) /8
+
+abatea<-( 95.75 - MC)/0.58 
+abateb<-(49.32-MC)/ 0.2
+abatec<-(159.94-MC)/0.78
+totalabate<-sum(abatea, abateb, abatec)
+
+abate<-rbind(abatea, abateb, abatec, totalabate)
+
+costa<-(abatea*MC)+(abatea*(95.97-MC)*0.5)
+costb<-(abateb*MC)+(abateb*(49.32-MC)*0.5)
+costc<-(abatec*MC)+(abatec*(159.94-MC)*0.5)
+totalcost<-sum(costa, costb, costc)
+
+cost<-rbind(costa, costb, costc, totalcost)
+
+partc<- cbind(abate, cost)
+colnames(partc)=c("Units abated", "Cost")
+row.names(partc)=c("Sector A", "Sector B", "Sector C", "Total Country X")
+partc
+```
+
+```{r, echo=FALSE}
+round(partc, 0)
+```
+
+#4 Coutry Y entering the carbon market 
+Are there any incentives for country Y to enter country X's carbon market and to thus place a voluntary cap on its emissions? Are there any incentives for country X to try to attract country Y into its market?
+
+Abatement cost for Country Y are lower for Sectors A and C in country X, it could be profitable for them to enter the international carbon market. 
+
+#5
+
+###a. In a carbon cap and trade market that only covers sectors in country X, how much local air pollution would you expect in country X? In country Y?
+Local air pollutants in country X and Y would be 300, equivalent to their carbon emissions.
+
+
+###b. If country Y enters the carbon market for country X (as in question 4 above), how much local pollution will there be in country X and country Y?
+If country Y enters the international carbon market this would increase decrease the cost of abatement to $29.87. Under this scheme counry Y would pollute 222 tons and Country X would pollute 378. Given the 1:1 ratio of other local air pollutants we would expect to have the same amount emissions 222 tons of local air pollutants in Country Y and 378 tons of local air pollutants in Country X. 
+
+$Aggregate MC= 954.01 - Abatement / 11.85$
+
+```{r, include=FALSE}
+MC<-(954.01-600) /11.85
+MC
+
+300-222
+
+(87.69 - 39.59)/0.26
+
+abatea<-(95.75 - MC)/0.58 
+abateb<-(49.32-MC)/ 0.2
+abatec<-(159.94-MC)/0.78
+abated<-(87.69 - MC)/0.26
+totalabate<-sum(abatea, abateb, abatec, abated)
+
+abate<-rbind(abatea, abateb, abatec, abated, totalabate)
+abate
+costa<-(abatea*MC)+(abatea*(95.97-MC)*0.5)
+costb<-(abateb*MC)+(abateb*(49.32-MC)*0.5)
+costc<-(abatec*MC)+(abatec*(159.94-MC)*0.5)
+costd<-(abated*MC)+(abated*(87.69-MC)*0.5)
+totalcost<-sum(costa, costb, costc, costd)
+
+cost<-rbind(costa, costb, costc, costd, totalcost)
+
+part5<- cbind(abate, cost)
+colnames(part5)=c("Units abated", "Cost")
+row.names(part5)=c("Sector A", "Sector B", "Sector C", "Sector D","Total")
+part5
+
+```
+
+```{r, echo=FALSE}
+round(part5,0)
+
+```
+
+
+
+###c. What advice can you give country X and country Y about the desirability of allowing international trade of carbon emissions credits?
+
+It looks like it is not worth doing it! 

@@ -20,12 +20,12 @@ abatement_costs <- read_csv("HW4Data.csv")
 - Sectors A, B, and C are in country X. Sector D is in a different country, Y.
 - Prices are in $/ton and quantities are in tons.
 
-1. Write down a plausible functional form for the marginal cost of abatement for sector A. Use regression analysis to estimate the parameters of that function. Repeating this for sectors B, C, and D will give you a model of the marginal cost of abatement function for each sector. How well do your models fit the data for each sector? You may need to experiment with different functional forms. Produce a plot of the estimated marginal abatement cost functions in all four sectors (this plot should go in your memo).
+1. Write down a plausible functional form for the marginal cost of abatement for sector A. Use regression analysis to estimate the parameters of that function. Repeating this for sectors B, C, and D will give you a model of the marginal cost of abatement function for each sector. How well do your models fit the data for each sector? You may need to experiment with different functional forms. Produce a plot of the estimated marginal abatement cost functions in all four sectors (this plot should go in your memo). 
 
 ```{r}
 #arrange data in tidy format 
 tidy_costs <- abatement_costs %>% 
-  gather(MC, Cost, MC_A:MC_D)
+  gather(MC, Cost, MC_A:MC_D) 
 ```
 
 ```{r}
@@ -74,21 +74,22 @@ model_plot_A
 
 2. Using these models and the current level of carbon emissions, derive each sector’s demand curve for carbon emissions. In other words, how much would each sector be willing to pay for the right to pollute the first unit, second unit, etc? Draw these demand curves on a graph. Which sector is willing to pay the most for the first unit of carbon emissions?
 
+Willingness to pay for first unit 
+```{r}
+ -8.65 + (0.56*180)
+ 9.32 + (0.2*200)
+ -11.66 + (0.78*220)
+9.69 + (0.26*300)
+```
+
+
+Sector C is willing to pay the most for the first unit: $159.94 
+
+
 - Current carbon emissions in the sectors are: (A=180, B=200, C=220, and D=300) 
 
-Equations: 
-Sector A: cost_abatement = 0.57684X  - 8.64448; A = 180 
-Sector A demand: demand = 103.8312 - 0.57684X 
-In sector A, demand at 180 will be 0, as firms are producing at 180 with no regulations in place. Using this and the slope of the abatement cost curve, we caclulated the intercept of the demand curve
 
-Sector B: cost_abatement = 9.31770 + 0.19874X; B = 200
 Sector C: 
-
-Graph of demand curves 
-```{r}
-
-
-```
 
 3. Now focus on country X (which contains sectors A, B, and C). Assume there are no “co-benefits” from carbon abatement (i.e. that there are no local pollutants that are affected by carbon abatement). Suppose to meet the Paris Accord commitments, country X needs to cut all carbon emissions in half. For each of the policy options listed below, derive: (1) the total cost of meeting the target in country X, (2) the cost (or benefit) to each sector, and (3) the tax revenue generated.
 
@@ -96,11 +97,17 @@ a. Cap on carbon. Each sector (A, B, and C) must cut its carbon emissions by 100
 reducing total emissions from 600 down to 300).
 
 New sector A emissions: 80
+
 New sector B emissions: 100
+
 New sector C emissions: 120 
+
 
 b. Tax on carbon. To emit a ton of carbon in country X, you must pay a tax of $t. You will need to
 find the tax that accomplishes the desired reduction.
+
+Solve for x 
+
 
 
 
@@ -109,6 +116,11 @@ minus 100 (same as in (a) above), thus achieving the total reduction of 300. The
 sectors are allowed to trade with each other. You will need to derive the outcome of that
 trading.
 
+New sector A emissions: 80
+
+New sector B emissions: 100
+
+New sector C emissions: 120 
 
 4. Again, without any co-benefits, suppose that country Y (which only has one carbon-emitting sector, D)
 has no obligation to reduce its emissions. Country X asks country Y to enter the country X carbon
