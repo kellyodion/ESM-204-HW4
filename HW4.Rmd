@@ -165,32 +165,29 @@ totalcost_x <- sum(totalcost_A, totalcost_B, totalcost_C)
 
 b. Tax on carbon. To emit a ton of carbon in country X, you must pay a tax of $t. You will need to
 find the tax that accomplishes the desired reduction.
+```{r}
+
+int_A_abate<-data.frame(coef(lm_A))[1,1]
+int_B_abate <-data.frame(coef(lm_B))[1,1]
+int_C_abate <-data.frame(coef(lm_C))[1,1]
+int_D_abate <-data.frame(coef(lm_D))[1,1]
+  
+solved_x_A <- (y - int_A_abate)/m_A
+```
 
 
 
-c. Cap and trade. Each sector (A, B, C) is allocated carbon permits equal to their current emissions
-minus 100 (same as in (a) above), thus achieving the total reduction of 300. Then, these three
-sectors are allowed to trade with each other. You will need to derive the outcome of that
-trading.
+c. Cap and trade. Each sector (A, B, C) is allocated carbon permits equal to their current emissions minus 100 (same as in (a) above), thus achieving the total reduction of 300. Then, these three sectors are allowed to trade with each other. You will need to derive the outcome of that trading.
 
 
-4. Again, without any co-benefits, suppose that country Y (which only has one carbon-emitting sector, D)
-has no obligation to reduce its emissions. Country X asks country Y to enter the country X carbon
-market. Doing so would require country Y to put a cap on carbon emissions at its current level of
-emissions (300 tons), but would then allow country Y to sell carbon offsets to sectors A, B, or C. Are
-there any incentives for country Y to enter country X’s carbon market and to thus place a voluntary cap
-on its emissions? Are there any incentives for country X to try to attract country Y into its market?
+4. Again, without any co-benefits, suppose that country Y (which only has one carbon-emitting sector, D) has no obligation to reduce its emissions. Country X asks country Y to enter the country X carbon market. Doing so would require country Y to put a cap on carbon emissions at its current level of emissions (300 tons), but would then allow country Y to sell carbon offsets to sectors A, B, or C. Are there any incentives for country Y to enter country X’s carbon market and to thus place a voluntary cap on its emissions? Are there any incentives for country X to try to attract country Y into its market?
 
 
-5. Now assume that every ton of carbon emissions creates 1 ton of local air pollution. Local air pollution
-causes economic damages (health, environmental, etc.), but only in the country in which it is emitted.
-Assume there are no local air pollution regulations in either country X or country Y.
+5. Now assume that every ton of carbon emissions creates 1 ton of local air pollution. Local air pollution causes economic damages (health, environmental, etc.), but only in the country in which it is emitted. Assume there are no local air pollution regulations in either country X or country Y.
 
-a. In a carbon cap and trade market that only covers sectors in country X, how much local air
-pollution would you expect in country X? In country Y?
+a. In a carbon cap and trade market that only covers sectors in country X, how much local air pollution would you expect in country X? In country Y?
 
-b. If country Y enters the carbon market for country X (as in question 4 above), how much local
-pollution will there be in country X and country Y?
+b. If country Y enters the carbon market for country X (as in question 4 above), how much local pollution will there be in country X and country Y?
 
 c. What advice can you give country X and country Y about the desirability of allowing
 international trade of carbon emissions credits?
