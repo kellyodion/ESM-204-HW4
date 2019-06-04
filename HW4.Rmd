@@ -87,9 +87,57 @@ Sector C:
 
 Graph of demand curves 
 ```{r}
-sector_a <- function(x) (103.8312 - 0.5768*x)
 
+m_A<-data.frame(coef(lm_A))[2,1]
+m_B <-data.frame(coef(lm_B))[2,1]
+m_C <-data.frame(coef(lm_C))[2,1]
+m_D <-data.frame(coef(lm_D))[2,1]
 
+x_A=180
+x_B=200
+x_C=220
+x_D=300
+
+y= 0
+
+intercept_function <- function(x, m, y) {
+  b <-(y-(-m*x))
+  return(b)
+}
+
+A_intercept<-intercept_function(x_A, m_A, y)
+B_intercept <- intercept_function(x_B, m_B, y)
+C_intercept <- intercept_function(x_C, m_C, y)
+D_intercept <- intercept_function(x_D, m_D, y)
+
+demand_function <- function(x, m, intercept) {
+ intercept + -m*x
+}
+
+demand_function_A <- function(x) {
+ A_intercept + -m_A*x
+}
+
+demand_function_B <- function(x) {
+ B_intercept + -m_B*x
+}
+
+demand_function_C <- function(x) {
+ C_intercept + -m_C*x
+}
+
+demand_function_D <- function(x) {
+ D_intercept + -m_D*x
+}
+
+demand_curves <- ggplot(tidy_costs, aes(x = Abatement, y = Cost)) +
+  stat_function(fun = demand_function_A, aes(color = "A")) +
+  stat_function(fun = demand_function_B, aes(color = "B")) +
+  stat_function(fun = demand_function_C, aes(color = "C")) +
+  stat_function(fun = demand_function_D, aes(color = "D")) +
+  theme_classic()
+
+demand_curves
 ```
 
 3. Now focus on country X (which contains sectors A, B, and C). Assume there are no “co-benefits” from carbon abatement (i.e. that there are no local pollutants that are affected by carbon abatement). Suppose to meet the Paris Accord commitments, country X needs to cut all carbon emissions in half. For each of the policy options listed below, derive: (1) the total cost of meeting the target in country X, (2) the cost (or benefit) to each sector, and (3) the tax revenue generated.
@@ -100,6 +148,20 @@ reducing total emissions from 600 down to 300).
 New sector A emissions: 80
 New sector B emissions: 100
 New sector C emissions: 120 
+```{r}
+abate <- c(80, 100, 120, 300)
+
+MCa <- demand_function_A(100)
+MCb <- demand_function_B(100)
+MCc <- demand_function_C(100)
+
+totalcost_A <- (MCa*100)+((A_intercept-MCa)*100)*0.5
+totalcost_B <- (MCb*100)+((B_intercept-MCb)*100)*0.5
+totalcost_C <- (MCc*100)+((C_intercept-MCc)*100)*0.5
+
+totalcost_x <- sum(totalcost_A, totalcost_B, totalcost_C)
+
+```
 
 b. Tax on carbon. To emit a ton of carbon in country X, you must pay a tax of $t. You will need to
 find the tax that accomplishes the desired reduction.
