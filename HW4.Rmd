@@ -34,6 +34,7 @@ cost_curves <- ggplot(tidy_costs, aes(x = Abatement, y = Cost)) +
   geom_smooth(aes(color = MC), method = lm) +
   theme_classic()
 
+
 cost_curves 
 ```
 
@@ -87,6 +88,7 @@ Sector C:
 Graph of demand curves 
 ```{r}
 sector_a <- function(x) (103.8312 - 0.5768*x)
+
 
 ```
 
