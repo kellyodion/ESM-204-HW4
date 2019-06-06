@@ -99,11 +99,12 @@ x_C=220
 x_D=300
 
 #slope calc function
-slope_function <- function(x, int, y) {
- m <- y-b/(-x) 
+slope_function <- function(x, b, y) {
+ m <- -y+b/x 
   return(b)
 }
 
+A_slope <- slope_function(x_A, int_A_abate, y)
 y= 0
 
 
