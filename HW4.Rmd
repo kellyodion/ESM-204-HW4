@@ -81,23 +81,55 @@ Sector C is willing to pay the most for the first unit: $159.94
 
 Deriving willingness to pay:
 ```{r}
-
+#slopes from original model
 m_A<-data.frame(coef(lm_A))[2,1]
 m_B <-data.frame(coef(lm_B))[2,1]
 m_C <-data.frame(coef(lm_C))[2,1]
 m_D <-data.frame(coef(lm_D))[2,1]
+
+#intercepts from original model
+int_A_abate<-data.frame(coef(lm_A))[1,1]
+int_B_abate <-data.frame(coef(lm_B))[1,1]
+int_C_abate <-data.frame(coef(lm_C))[1,1]
+int_D_abate <-data.frame(coef(lm_D))[1,1]
 
 x_A=180
 x_B=200
 x_C=220
 x_D=300
 
+#slope calc function
+slope_function <- function(x, int, y) {
+ m <- y-b/(-x) 
+  return(b)
+}
+
 y= 0
 
+
+demand_curves <- ggplot(tidy_costs, aes(x = Abatement, y = Cost)) +
+  stat_function(fun = demand_function_A, aes(color = "Sector A")) +
+  stat_function(fun = demand_function_B, aes(color = "Sector B")) +
+  stat_function(fun = demand_function_C, aes(color = "Sector C")) +
+  stat_function(fun = demand_function_D, aes(color = "Sector D")) +
+  scale_x_continuous(limits = c(0,300), expand = c(0,0)) +
+  scale_y_continuous(limits = c(0,200), expand = c(0,0)) +
+  theme_classic() +
+  labs(y = "Price Per Ton", x = "Carbon Emissions (tons)", title = "Marginal Willingness to pay by Sector") +
+   scale_colour_manual("Legend", values = c("darkblue", "darkgreen", "yellow", "black",  "darkred"))
+
+
+demand_curves
+```
+
+```{r}
+
+#this might be irrelevant now, but dont delete 
 intercept_function <- function(x, m, y) {
   b <-(y-(-m*x))
   return(b)
 }
+
 
 A_intercept<-intercept_function(x_A, m_A, y)
 B_intercept <- intercept_function(x_B, m_B, y)
@@ -124,19 +156,6 @@ demand_function_D <- function(x) {
  D_intercept + -m_D*x
 }
 
-demand_curves <- ggplot(tidy_costs, aes(x = Abatement, y = Cost)) +
-  stat_function(fun = demand_function_A, aes(color = "Sector A")) +
-  stat_function(fun = demand_function_B, aes(color = "Sector B")) +
-  stat_function(fun = demand_function_C, aes(color = "Sector C")) +
-  stat_function(fun = demand_function_D, aes(color = "Sector D")) +
-  scale_x_continuous(limits = c(0,300), expand = c(0,0)) +
-  scale_y_continuous(limits = c(0,200), expand = c(0,0)) +
-  theme_classic() +
-  labs(y = "Price Per Ton", x = "Carbon Emissions (tons)", title = "Marginal Willingness to pay by Sector") +
-   scale_colour_manual("Legend", values = c("darkblue", "darkgreen", "yellow", "black",  "darkred"))
-
-
-demand_curves
 ```
 
 3. Now focus on country X (which contains sectors A, B, and C). Assume there are no “co-benefits” from carbon abatement (i.e. that there are no local pollutants that are affected by carbon abatement). Suppose to meet the Paris Accord commitments, country X needs to cut all carbon emissions in half. For each of the policy options listed below, derive: (1) the total cost of meeting the target in country X, (2) the cost (or benefit) to each sector, and (3) the tax revenue generated.
