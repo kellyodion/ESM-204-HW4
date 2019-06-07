@@ -1,0 +1,244 @@
+---
+title: "angie"
+author: "Kirby Bartlett"
+date: "June 7, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(stargazer)
+library(dplyr)
+library(ggplot2)
+library(Hmisc)
+library(RColorBrewer)
+emissions <- read_csv("HW4Data.csv")
+```
+
+## Assumptions
+```{r}
+# Current carbon emissions in the sectors are: (A=180, B=200, C=220, and D=300).
+# Sectors A, B, and C are in country X. Sector D is in a different country, Y.
+# Prices are in $/ton and quantities are in tons.
+```
+
+##Part 1 Regressions
+```{r}
+lm_a <- lm(MC_A ~ Abatement, data = emissions, family="linear")
+summary(lm_a) #r square .91
+#y = 0.57684 x - 8.64448
+lm_b <- lm(MC_B ~ Abatement, data = emissions, family="linear")
+summary(lm_b) #r sq .56
+#y = 0.19874 x + 9.31770
+lm_c <- lm(MC_C ~ Abatement, data = emissions, family="linear")
+summary(lm_c) #r sq .87
+#y = 0.78383 x - 11.65503
+lm_d <- lm(MC_D ~ Abatement, data = emissions, family="linear")
+summary(lm_d)#r sq .54
+#y = 0.25993 x + 9.68751
+```
+
+```{r stargazer, results = 'asis'}
+# Stargazer table
+stargazer_lm <- stargazer(lm_a, lm_b, lm_c, lm_d, type="html", title="Regression Results")
+```
+```{r}
+# Marginal cost equations for each sector
+MC_a= function(x){
+  (lm_a$coefficients[1] + lm_a$coefficients[2] * x)
+}
+MC_b= function(x){
+  (lm_b$coefficients[1] + lm_b$coefficients[2] * x)
+}
+MC_c= function(x){
+  (lm_c$coefficients[1] + lm_c$coefficients[2] * x)
+}
+MC_d= function(x){
+  (lm_d$coefficients[1] + lm_d$coefficients[2] * x)
+}
+# Same equations but solving for abatement (x)
+abate_a= function (y) {
+  ((y - lm_a$coefficients[1])/lm_a$coefficients[2])
+}
+abate_b= function (y) {
+  ((y - lm_b$coefficients[1])/lm_b$coefficients[2])
+}
+abate_c= function (y) {
+  ((y - lm_c$coefficients[1])/lm_c$coefficients[2])
+}
+abate_d= function (y) {
+  ((y - lm_d$coefficients[1])/lm_d$coefficients[2])
+}
+```
+
+###Plot
+```{r, error=TRUE}
+ggplot(emissions, aes(x = Abatement, y = MC_A)) + 
+  geom_point() +
+  stat_smooth(method = "lm", col = "indianred1")+
+  ylab("Marginal Cost of Abatement (Sector A)")+
+  theme_classic()
+ggplot(emissions, aes(x = Abatement, y = MC_B)) + 
+  geom_point() +
+  stat_smooth(method = "lm", col = "olivedrab3")+
+  ylab("Marginal Cost of Abatement (Sector B)")+
+  theme_classic()
+ggplot(emissions, aes(x = Abatement, y = MC_C)) + 
+  geom_point() +
+  stat_smooth(method = "lm", col = "turquoise3")+
+  ylab("Marginal Cost of Abatement (Sector C)")+
+  theme_classic()
+ggplot(emissions, aes(x = Abatement, y = MC_D)) + 
+  geom_point() +
+  stat_smooth(method = "lm", col = "orchid3")+
+  ylab("Marginal Cost of Abatement (Sector D)")+
+  theme_classic()
+```
+
+
+##Part 2 Demand
+```{r}
+#find yint
+#y = 0.57684 x - 8.64448
+-8.64448 + (0.57684*180)
+#(0, 95.18672)
+#y = 0.19874 x + 9.31770
+9.31770 + (0.19874*200)
+#(0, 49.0657)
+#y = 0.78383 x - 11.65503
+-11.65503 + (0.78383*220)
+#(0, 160.7876)
+#y = 0.25993 x + 9.68751
+9.68751 + (0.25993*300)
+#(0, 87.66651)
+#Sector C is willing to pay the most for the first unit, because they have the largest y intercept??
+#no idea what this does but it was in the other code - making a dataset of points along the demand curve?
+demanda<-Hmisc::bezier(x = c(0, 180), y = c(95.18672, 0)) %>% as_data_frame()
+#y = -0.57684 x + 95.18672
+demandb<- Hmisc::bezier(x = c(0, 200), y = c(49.0657, 0)) %>% as_data_frame()
+#y = -0.19874 x + 49.0657
+demandc<-Hmisc::bezier(x = c(0, 220), y = c(160.7876, 0)) %>% as_data_frame()
+#y = -0.78383 x + 160.7876
+demandd<- Hmisc::bezier(x = c(0, 300), y = c(87.66651, 0)) %>% as_data_frame()
+#y = -0.25993 x + 87.66651
+demanda$type<- rep("Sector A", length(demanda$x))
+demandb$type<- rep("Sector B", length(demandb$x))
+demandc$type<-rep("Sector C", length(demandc$x))
+demandd$type<- rep("Sector D", length(demandc$x))
+#merging all the demand curves together
+all<- rbind(demanda, demandb, demandc, demandd)
+all
+ggplot(all, aes(x=x, y=y, color=type))+
+  #tiff('demand.tiff', units="in", width=10, height=5, res=300)+
+  geom_line(size=1)+
+  labs(x="Carbon Emissions (tons)", y="Price ($) per Ton", title="Estimated Demand Curve for Carbon Emissions")+
+  theme_classic()+
+  scale_x_continuous(expand=c(0,0))+
+  scale_y_continuous(expand=c(0,0))+
+  theme(legend.title=element_blank())+
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+
+#$Part 3: Country X
+# For each of the following policies derive: 1. the total cost of meeting the target in country X 2. the cost or benefit to each sector and 3. the tax revenue generated
+###  a. Carbon Cap
+####No tax revenue generated
+
+
+```{r}
+# Each sector cuts emissions by 100 tons
+MC_a100 = MC_a(100) # $49
+MC_b100 = MC_b(100) # $29.2
+MC_c100 = MC_c(100) # $66.7
+# Find area under demand curve for abatament = 100 
+TC_a100 = integrate(MC_a, 0, 100)$value # 2019.8
+TC_b100 = integrate(MC_b, 0, 100)$value # 1925.5
+TC_c100 = integrate(MC_c, 0, 100)$value # 2753.6
+Tc_total_100 = TC_a100 + TC_b100 + TC_c100 # 6698.9
+```
+
+### b. Carbon Tax
+```{r}
+# Aggregate MC for Sectors A, B, C
+MC_abc= function(x){
+  ((x+15.20)/8)
+}
+# When abatment = 300
+MC_abc300 <- MC_abc(300) # $39.4
+# Abatement by sector
+abate_a_tax = abate_a(MC_abc300) #83.3 
+abate_b_tax = abate_b(MC_abc300) #151
+abate_c_tax = abate_c(MC_abc300) #65.1
+# Check abatement in each sector equals 300
+abate_abc_tax = abate_a_tax +abate_b_tax + abate_c_tax
+# Revenue tax
+# Equal tax price times emissions
+revenue_tax= 300*MC_abc300 # 11820
+# Cost for each sector of country X
+cost_a_tax= integrate(MC_a, 0, abate_a_tax)$value # 1280.8
+cost_b_tax=integrate(MC_b, 0, abate_b_tax)$value # 3687.0
+cost_c_tax= integrate(MC_c, 0, abate_c_tax)$value # 903.6
+# Total cost of tax
+cost_total_tax = cost_a_tax + cost_b_tax + cost_c_tax # 5871.4
+# Cost for each sector if tax payment is included
+cost_a_tax2= as.numeric(integrate(MC_a, 0, abate_a_tax)$value+ (MC_abc300 * (180 - abate_a_tax))) # 5091.2
+cost_b_tax2=as.numeric(integrate(MC_b, 0, abate_b_tax)$value + (MC_abc300 * (200 - abate_b_tax))) # 5603.3
+cost_c_tax2= as.numeric(integrate(MC_c, 0, abate_c_tax)$value + (MC_abc300 * (220 - abate_c_tax))) # 7005.2
+# Total cost of tax if tax payment is included
+cost_total_tax2 = cost_a_tax2 + cost_b_tax2 + cost_c_tax2 # 17699.8
+# Check that minus the revenue of tax it equals the first cost
+c_r= cost_total_tax2 - revenue_tax # 5879.8
+```
+
+### c. Cap and Trade
+```{r}
+# To stop trade two things need to happen
+# 1. Every sector needs to have the same abatement cost
+# 2. Total abatement needs to equal 300
+# The number of tons abated is the same as in 3.b.
+# Units bought by each sector
+# Each sector needed needed to abate 100 units
+bought_a = 100 - abate_a_tax # 16.7
+bought_b = 100 - abate_b_tax # -51.4
+bought_c = 100 - abate_c_tax # 34.9
+# Find cost per sector
+cost_a_trade = (bought_a*MC_abc300) + cost_a_tax # 1939.2
+cost_b_trade = (bought_b*MC_abc300) + cost_b_tax # 1663.3
+cost_c_trade = (bought_c*MC_abc300) + cost_c_tax # 2277.2
+# Find total cost
+cost_total_trade = cost_a_trade + cost_b_trade + cost_c_trade # 5879.8
+# Assuming sectors trading are paying/getting payed the optimal price of 39.4 for the abatement of one ton of carbon
+```
+
+##Part 4
+```{r}
+# Yes, because sector D in country Y has a lower MC of abatement than sectors A and C of country X. Meaning that that both countries would benefit from trading.
+```
+
+##Part 5 
+### A- With a cap and trade market, country X will reduce its emissions by 300 tons overall, leaving 300 tons of carbon emitted. This corresponds with 300 tons of local air pollution. For country Y, if they aren't in a cap and trade program they will continue to emit 300 tons of carbon, which corresponds with 300 tons of air pollution there. 
+
+```{r}
+# First we need to calculate how much each sector would emit
+# Agreggate MC for Sectors A, B, C, and D
+MC_abcd = function(x){
+  (x + 52.46)/11.88
+}
+# When abatement = 300
+MC_abcd300 <- MC_abcd(300) # 29.67
+abate_a2 = abate_a(MC_abcd300) #66.4
+abate_b2 = abate_b(MC_abcd300) #102.4
+abate_c2 = abate_c(MC_abcd300) #52.7
+abate_d2 = abate_d(MC_abcd300) #76.9
+# Total pollution in trade between countries
+country_x = (180 + 200 + 220 - abate_a2 - abate_b2 - abate_c2) # 378
+country_y = (300 - abate_d2) # 223.1
+# Check total abatement
+abate_abcd = abate_a2+abate_b2+abate_c2+abate_d2
+# c. For country Y, the trade is even more desirable if there is co-benefits. This is because besides the direct benefits from the trade with Sector A and Sector C, it receives indirect health benefits from reducing its emissions more than it would without the trade. For country X, the desirability of allowing the international trade of carbon emission credits will depend on the environmental cost produced by air pollution. Country X should go ahead with the trade only if the environmental cost is lower than the cost of trading carbon credits with country Y.
+```
